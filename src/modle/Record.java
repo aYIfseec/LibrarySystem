@@ -7,6 +7,9 @@ public class Record {
 	private String lendTime;
 	private String returnTime;
 	
+	private String name;
+	
+	
 	public Record(){}
 	public Record(int uid, int bid, String lendTime, String returnTime) {
 		//this.id = id;
@@ -38,5 +41,11 @@ public class Record {
 	
 	public String getReturnTime() {return returnTime;}
 	public void setReturnTime(String returnTime) {this.returnTime = returnTime;}
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 	
 }

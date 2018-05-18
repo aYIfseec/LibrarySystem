@@ -497,7 +497,7 @@ public class AdminUi extends JFrame implements ActionListener {
                     || id_8.getText().equals("")) {
                 ShowMessageUtil.winMessage("书名、类型、数量、作者均不能为空！");
             } else {
-                bookService.addBooks(id, name, count, type, author, address);
+                bookDao.insertBook(name, count, type, author, address);
                 AdminUi.mainUi(aId, 6);
                 this.dispose();
             }
@@ -518,7 +518,7 @@ public class AdminUi extends JFrame implements ActionListener {
                 ShowMessageUtil.winMessage("信息未填齐全！");
             } else {
                 Book bk = bookDao.searchBook(name);
-                // TODO
+                // TODO 
                 if (bookService.updateBook(bk)) {
                     ShowMessageUtil.winMessage("书籍信息修改成功！");
                     AdminUi.mainUi(aId, 5);

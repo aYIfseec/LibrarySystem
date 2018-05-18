@@ -21,9 +21,13 @@ public class RecordDaoImpl {
     }
     
     //借还信息表中加入信息
-    public boolean insertRecord(Record record) {
+    public boolean insertRecord(Record record, Connection conn) {
+        boolean isRelease = false;
         String sql="insert into Record(uid,bid,lendTime,returnTime)values(?,?,?,?)";
-        Connection conn = BaseDaoImpl.getConn();
+        if(conn == null) {
+            conn = BaseDaoImpl.getConn();
+            isRelease = true;
+        }
         PreparedStatement psts=null;
         try {
             psts = conn.prepareStatement(sql);
@@ -34,12 +38,11 @@ public class RecordDaoImpl {
             int res = psts.executeUpdate();//执行 ，返回值为int
             if(res>0) return true;
         } catch (SQLException e) {
-            //System.out.println("3");
             e.printStackTrace();
         } finally {
             try {
-                conn.close();//关闭连接
-                psts.close();//关闭预编译
+                if(isRelease && conn != null) conn.close();//关闭连接
+                if(psts != null) psts.close();//关闭预编译
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -49,9 +52,13 @@ public class RecordDaoImpl {
     
     
     //修改还借记录表，主要是还书时调用，修改returnTime
-    public boolean updataRecord(int uid, int bid, String returnTime) {
+    public boolean updataRecord(int uid, int bid, String returnTime, Connection conn) {
+        boolean isRelease = false;
         String sql = "update Record set returnTime=? where uid=? and bid="+bid;
-        Connection conn = BaseDaoImpl.getConn();
+        if(conn == null) {
+            conn = BaseDaoImpl.getConn();
+            isRelease = true;
+        }
         PreparedStatement psts=null;
         try {
             psts = conn.prepareStatement(sql);
@@ -61,10 +68,10 @@ public class RecordDaoImpl {
             if(res > 0) return true;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally{
+        } finally {
             try {
-                conn.close();//关闭连接
-                psts.close();//关闭预编译
+                if(isRelease && conn != null) conn.close();//关闭连接
+                if(psts != null) psts.close();//关闭预编译
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -72,8 +79,9 @@ public class RecordDaoImpl {
         return false;
     }
 
-    public List<Record> getRecordsByUid(int uid) {
-        String sql = "select * from Record where uid="+uid;
+    public Object[][] getRecordsByUid(int uid) {
+        String sql = "select Record.* , name  from Record, Book " +
+        		"where Record.bid=Book.id and uid="+uid;
         Connection conn = BaseDaoImpl.getConn();
         ResultSet rs = null;
         List<Record> list = new ArrayList<Record>();
@@ -83,9 +91,11 @@ public class RecordDaoImpl {
             rs = psts.executeQuery();// 执行
             while (rs.next()) {
                 int bid = rs.getInt("bid");
+                String name = rs.getString("name");
                 String lendTime = rs.getString("lendTime");
                 String returnTime = rs.getString("returnTime");
                 Record rd = new Record(bid,lendTime,returnTime);
+                rd.setName(name);
                 list.add(rd);
             }
         } catch (SQLException e) {
@@ -99,7 +109,16 @@ public class RecordDaoImpl {
                 e.printStackTrace();
             }
         }
-        return list;
+        Object[][] obj = new Object[list.size()][4];
+        int i = 0;
+        for (Record re: list) {
+            obj[i][0] = re.getBid();
+            obj[i][1] = re.getName();
+            obj[i][2] = re.getLendTime();
+            obj[i][3] = re.getReturnTime();
+            i++;
+        }
+        return obj;
     }
     
 }

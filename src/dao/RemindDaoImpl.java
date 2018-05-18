@@ -55,8 +55,8 @@ public class RemindDaoImpl {
      */
     public List<Book> getRemindByUid(int uid) {
         List<Book> books = new ArrayList<Book>();
-        String sql = "select id, name from Remind, Books " +
-        		"where Remind.bid = Books.id and isRead = 0 and uid="+uid;
+        String sql = "select Book.id as id, name from Remind, Book " +
+        		"where Remind.bid = Book.id and isRead = 0 and uid="+uid;
         Connection conn = BaseDaoImpl.getConn();
         ResultSet rs = null;
         PreparedStatement psts = null;

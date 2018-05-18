@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.table.JTableHeader;
 
 import service.BookService;
 import util.ShowMessageUtil;
@@ -36,7 +37,7 @@ public class UserUi extends JFrame implements ActionListener {
     private JLabel card0 = new JLabel();
     private JLabel card1 = new JLabel();
     private JLabel card2 = new JLabel();
-    private JLabel card3 = new JLabel();
+    private JPanel card3 = new JPanel();
     private JLabel card4 = new JLabel();
 
     private JLabel bookname = new JLabel("书  名");
@@ -44,8 +45,9 @@ public class UserUi extends JFrame implements ActionListener {
     private JButton btnBook = new JButton("预约此书");
     private JTextField textName = new JTextField();
 
-    private JLabel bNum = new JLabel("书 名");
-    private JTextField textBnum = new JTextField();
+    // private JLabel bNum = new JLabel("书 名");
+    // private JTextField textBnum = new JTextField();
+    String[] recordTableHead = {"序 号", "书 名","借书时间","还书时间"};
     private String lendstr = new String(
             "<html><style>"
                     + "table{padding-left:40px;}td{width:150px;}.num{width:80px;}</style>"
@@ -112,7 +114,7 @@ public class UserUi extends JFrame implements ActionListener {
 
 
         // card2
-        tabbedPane.addTab("2.借阅图书", card2);
+        tabbedPane.addTab("2.可借提醒", card2);
         bookname.setBounds(160, 50, 80, 30);
         textName.setBounds(240, 50, 200, 30);
         btnSchB.setBounds(450, 50, 80, 30);
@@ -132,35 +134,16 @@ public class UserUi extends JFrame implements ActionListener {
 
         // card3
         tabbedPane.addTab("3.借还记录", card3);
-        List<Record> list3 = recordDao.getRecordsByUid(uId);
-        String record = new String(lendstr);
-        int len3 = list3.size(), k;
-        for (k = 0; k < len3; k++) {
-            List<Book> listb = bookDao.queryAllBooks();
-            int x;
-            for (x = 0; x < listb.size(); x++)
-                if (listb.get(x).getId() == list3.get(k).getBid())
-                    break;
-            record += "<tr><td class='num'>" + (k + 1) + "</td><td>"
-                    + listb.get(x).getName() + "</td><td>"
-                    + list3.get(k).getLendTime() + "</td><td>"
-                    + list3.get(k).getReturnTime() + "</td></tr>";
-        }
-        record += "</table></html>";
-        bNum.setBounds(160, 50, 50, 30);
-        textBnum.setBounds(210, 50, 200, 30);
-        bNum.setFont(font1);
-        textBnum.setFont(font1);
-        card3.add(bNum);
-        card3.add(textBnum);
-        // card3.setText(record);
-        JLabel allRecords = new JLabel();
-        allRecords.setText(record);
-        allRecords.setFont(font);
-        allRecords.setBounds(50, 100, 700, (len3 + 1) * 30);
-        card3.add(allRecords);
-        card3.setFont(font);
-        card3.setText("");
+        
+        JTable recordTable = new JTable(recordDao.getRecordsByUid(uId), recordTableHead);
+        recordTable.setFont(font);
+        recordTable.setFillsViewportHeight(true);
+        recordTable.getTableHeader().setPreferredSize(new Dimension(0, 30));
+        recordTable.getTableHeader().setFont(font1);
+        recordTable.setRowHeight(30);
+        JScrollPane scroll = new JScrollPane(recordTable);
+        scroll.setSize(750, 480);
+        card3.add(scroll);
 
         // card4
         tabbedPane.addTab("4.个人信息", card4);

@@ -60,7 +60,6 @@ public class UserDaoImpl{
 	//修改用户密码
 	public boolean updUserPassword(int id, String password,String str) {
 		String sql = "update "+str+" set password=? where id="+id;
-		//System.out.println(sql);
 		Connection conn = BaseDaoImpl.getConn();
 		PreparedStatement psts=null;
 		try {
@@ -81,11 +80,11 @@ public class UserDaoImpl{
 		return false;
 	}
 	
-	//查看所有用户
+	// 查看所有用户
 	public List<User> queryAllUser() {
 		String sql = "select * from User";
 		Connection conn = BaseDaoImpl.getConn();
-		//创建一个结果’集‘
+		//创建一个结果集
 		ResultSet rs = null;
 		List<User> list = new ArrayList<User>();
 		PreparedStatement psts = null;

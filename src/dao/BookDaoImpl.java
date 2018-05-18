@@ -24,28 +24,28 @@ public class BookDaoImpl {
     
     
     //增加图书
-    public boolean insertBook(Book book) {
+    public boolean insertBook(String name, int count, String type,
+            String author, String address) {
         String sql = "insert into " +
-        		"Book(id, name, count, type, author, discount, hasLended, address)" +
-        		"values(?,?,?,?,?,?,?,?)";
+        		"Book(name, count, type, author, discount, hasLended, address)" +
+        		"values(?,?,?,?,?,?,?)";
         Connection conn = BaseDaoImpl.getConn();
         PreparedStatement psts = null;
         try {
             psts = conn.prepareStatement(sql);
-            psts.setObject(1, book.getId());
-            psts.setObject(2, book.getName());
-            psts.setObject(3, book.getCount());
-            psts.setObject(4, book.getType());
-            psts.setObject(5, book.getAuthor());
-            psts.setObject(6, book.getDiscount());
-            psts.setObject(7, book.getHasLended());
-            psts.setObject(8, book.getAddress());
-            psts.executeUpdate();// 执行 ，返回值为int
+            psts.setObject(1, name);
+            psts.setObject(2, count);
+            psts.setObject(3, type);
+            psts.setObject(4, author);
+            psts.setObject(5, 0);
+            psts.setObject(6, 0);
+            psts.setObject(7, address);
+            return psts.executeUpdate() > 0;// 执行 ，返回值为int
         } catch (SQLException e) {
-            // System.out.println("3");
             e.printStackTrace();
         } finally {
             try {
+                conn.close();
                 psts.close();// 关闭预编译
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -63,7 +63,7 @@ public class BookDaoImpl {
         PreparedStatement psts = null;
         try {
             psts = conn.prepareStatement(sql);
-            rs = psts.executeQuery();// 执行
+            rs = psts.executeQuery(); // 执行
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
@@ -101,26 +101,56 @@ public class BookDaoImpl {
             if(res > 0) return true;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+                psts.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
     
     
-    public boolean updateBook(int id , int count, int discount) {
-        String sql = "update Book set count=?,discount=? where id="+id;
-        Connection conn = BaseDaoImpl.getConn();
-        PreparedStatement psts=null;
+    public boolean updateBook(Book book, Connection conn) {
+        boolean isRelease = false;
+        String sql = "update Book set ";
+        if (book.getCount() != 0) {
+            sql += "count="+book.getCount() + ",";
+        }
+        if (book.getDiscount() != 0) {
+            sql += "discount="+book.getDiscount() + ",";
+        }
+        if (book.getHasLended() != 0) {
+            sql += "hasLended="+book.getHasLended() + ",";
+        }
+        if (book.getType() != null) {
+            sql += "type="+book.getType() + ",";
+        }
+        if (book.getAddress() != null) {
+            sql += "address="+book.getAddress() + ",";
+        }
+        if (book.getAuthor() != null) {
+            sql += "author="+book.getAuthor() + ",";
+        }
+        sql = sql.substring(0, sql.length() - 1);
+        sql += " where id=" + book.getId();
+        if(conn == null) {
+            conn = BaseDaoImpl.getConn();
+            isRelease = true;
+        }
+        PreparedStatement psts = null;
         try {
             psts = conn.prepareStatement(sql);
-            psts.setObject(1, count);
-            psts.setObject(2, discount);
             int res = psts.executeUpdate();
             if(res > 0) return true;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally{
             try {
-                psts.close();//关闭预编译
+                if (isRelease && conn != null) conn.close();
+                if (psts != null) psts.close();//关闭预编译
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -129,13 +159,65 @@ public class BookDaoImpl {
     }
     
     public Book searchBook(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String sql = "select * from Book where name = " + name;
+        Connection conn = BaseDaoImpl.getConn();
+        ResultSet rs = null;
+        Book book = new Book();
+        PreparedStatement psts = null;
+        try {
+            psts = conn.prepareStatement(sql);
+            rs = psts.executeQuery(); // 执行
+            book.setId(rs.getInt("id"));
+            book.setName(rs.getString("name"));
+            book.setCount(rs.getInt("count"));
+            book.setType(rs.getString("type"));
+            book.setAuthor(rs.getString("author"));
+            book.setDiscount(rs.getInt("discount"));
+            book.setHasLended(rs.getInt("hasLended"));
+            book.setAddress(rs.getString("address"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+                psts.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return book;
     }
 
     public Book queryBook(int bId) {
-        // TODO Auto-generated method stub
-        return null;
+        String sql = "select * from Book where id = " + bId;
+        Connection conn = BaseDaoImpl.getConn();
+        ResultSet rs = null;
+        Book book = new Book();
+        PreparedStatement psts = null;
+        try {
+            psts = conn.prepareStatement(sql);
+            rs = psts.executeQuery(); // 执行
+            book.setId(rs.getInt("id"));
+            book.setName(rs.getString("name"));
+            book.setCount(rs.getInt("count"));
+            book.setType(rs.getString("type"));
+            book.setAuthor(rs.getString("author"));
+            book.setDiscount(rs.getInt("discount"));
+            book.setHasLended(rs.getInt("hasLended"));
+            book.setAddress(rs.getString("address"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+                psts.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return book;
     }
 
 }

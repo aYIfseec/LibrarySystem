@@ -1,5 +1,7 @@
 package service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 import util.DateUtil;
@@ -7,9 +9,9 @@ import util.DateUtil;
 import modle.Book;
 import modle.Record;
 
+import dao.BaseDaoImpl;
 import dao.BookDaoImpl;
 import dao.RecordDaoImpl;
-import dao.UserDaoImpl;
 
 public class BookService {
     private static BookService bookService;
@@ -18,12 +20,10 @@ public class BookService {
     }
     
     private BookDaoImpl bookDao;
-    private UserDaoImpl userDao;
     private RecordDaoImpl recordDao;
     
     private BookService() {
         bookDao = BookDaoImpl.getInstance();
-        userDao = UserDaoImpl.getInstance();
         recordDao  = RecordDaoImpl.getInstance();
     }
     
@@ -40,32 +40,123 @@ public class BookService {
     
     public boolean lendBook(int uId, int bId){
         Book bk = bookDao.queryBook(bId);
-        if(bk.getCount() == 0) return false;
+        // 已借出数量等于书籍总数量，则不可借
+        if(bk.getCount() == bk.getHasLended()) return false;
         Record rd = new Record(uId,bk.getId(), DateUtil.getDate(), "未还");
-        if(bookDao.updateBook(bk.getId(), bk.getCount()-1,bk.getDiscount()+1)
-                && recordDao.insertRecord(rd))
+        bk.setHasLended(bk.getHasLended() + 1);
+        bk.setDiscount(bk.getDiscount());
+        Connection conn = BaseDaoImpl.getConn();
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+        boolean res = bookDao.updateBook(bk, conn);
+        if(!res) {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+        res = recordDao.insertRecord(rd, conn);
+        if (!res) {
+            try {
+                conn.rollback();
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        } else {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
             return true;
-        else return false;
+        }
     }
 
     
     public boolean returnBook(int uId, int bId){
         Book bk = bookDao.queryBook(bId);
-        if(bookDao.updateBook(bk.getId(), bk.getCount()+1, bk.getDiscount())
-                && recordDao.updataRecord(uId, bk.getId(), DateUtil.getDate()))
+        bk.setHasLended(bk.getHasLended() - 1);
+        Connection conn = BaseDaoImpl.getConn();
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+        boolean res = recordDao.updataRecord(uId, bk.getId(), DateUtil.getDate(), conn);
+        if(!res) {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+        res = bookDao.updateBook(bk, conn);
+        if(!res) {
+            try {
+                conn.rollback();
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        } else {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
             return true;
-        else return false;
+        }
     }
 
     public boolean updateBook(Book b) {
         return false;
     }
 
-    public void addBooks(int id, String name, int count, String type,
-            String author, String address) {
-        // TODO Auto-generated method stub
-        
-    }
 
     public String queryAllBooks() {
         List<Book> list = bookDao.queryAllBooks();
