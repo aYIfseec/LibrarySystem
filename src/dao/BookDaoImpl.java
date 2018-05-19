@@ -91,8 +91,8 @@ public class BookDaoImpl {
     }
     
     
-    public boolean delBooks(int id) {
-        String sql="delete from Book where id = "+id;
+    public boolean delBook(String name) {
+        String sql="delete from Book where name = '" + name + "'";
         Connection conn = BaseDaoImpl.getConn();
         PreparedStatement psts = null;
         try {
@@ -126,16 +126,19 @@ public class BookDaoImpl {
             sql += "hasLended="+book.getHasLended() + ",";
         }
         if (book.getType() != null) {
-            sql += "type="+book.getType() + ",";
+            sql += "type='"+book.getType() + "',";
         }
         if (book.getAddress() != null) {
-            sql += "address="+book.getAddress() + ",";
+            sql += "address='"+book.getAddress() + "' ,";
         }
         if (book.getAuthor() != null) {
-            sql += "author="+book.getAuthor() + ",";
+            sql += "author='"+book.getAuthor() + "' ,";
         }
         sql = sql.substring(0, sql.length() - 1);
-        sql += " where id=" + book.getId();
+        sql += " where name='" + book.getName() + "'";
+        
+        System.out.println(sql);
+        
         if(conn == null) {
             conn = BaseDaoImpl.getConn();
             isRelease = true;
@@ -159,7 +162,7 @@ public class BookDaoImpl {
     }
     
     public Book searchBook(String name) {
-        String sql = "select * from Book where name = " + name;
+        String sql = "select * from Book where name = '" + name + "'";
         Connection conn = BaseDaoImpl.getConn();
         ResultSet rs = null;
         Book book = new Book();
@@ -167,14 +170,16 @@ public class BookDaoImpl {
         try {
             psts = conn.prepareStatement(sql);
             rs = psts.executeQuery(); // 执行
-            book.setId(rs.getInt("id"));
-            book.setName(rs.getString("name"));
-            book.setCount(rs.getInt("count"));
-            book.setType(rs.getString("type"));
-            book.setAuthor(rs.getString("author"));
-            book.setDiscount(rs.getInt("discount"));
-            book.setHasLended(rs.getInt("hasLended"));
-            book.setAddress(rs.getString("address"));
+            if (rs.next()) {
+                book.setId(rs.getInt("id"));
+                book.setName(rs.getString("name"));
+                book.setCount(rs.getInt("count"));
+                book.setType(rs.getString("type"));
+                book.setAuthor(rs.getString("author"));
+                book.setDiscount(rs.getInt("discount"));
+                book.setHasLended(rs.getInt("hasLended"));
+                book.setAddress(rs.getString("address"));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

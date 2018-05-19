@@ -90,11 +90,10 @@ public class RecordDaoImpl {
             psts = conn.prepareStatement(sql);
             rs = psts.executeQuery();// 执行
             while (rs.next()) {
-                int bid = rs.getInt("bid");
                 String name = rs.getString("name");
                 String lendTime = rs.getString("lendTime");
                 String returnTime = rs.getString("returnTime");
-                Record rd = new Record(bid,lendTime,returnTime);
+                Record rd = new Record(lendTime,returnTime);
                 rd.setName(name);
                 list.add(rd);
             }
@@ -112,7 +111,7 @@ public class RecordDaoImpl {
         Object[][] obj = new Object[list.size()][4];
         int i = 0;
         for (Record re: list) {
-            obj[i][0] = re.getBid();
+            obj[i][0] = i + 1;
             obj[i][1] = re.getName();
             obj[i][2] = re.getLendTime();
             obj[i][3] = re.getReturnTime();

@@ -47,7 +47,7 @@ public class RemindService {
             ids.append(books.get(j).getId());
         }
         if (ids.length() > 0) {
-            remindDao.updataRemindBatch(ids.toString());
+            remindDao.updateRemindBatch(ids.toString());
         }
         return str.toString();
     }

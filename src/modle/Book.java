@@ -23,6 +23,10 @@ public class Book {
 		this.address = address;
 	}
 	
+	public Book(String name, int count, String type, String author, String address) {
+	    this(0, name, count, type, author, 0, 0, address);
+	}
+	
 	public String getAddress() {return address;}
 	public void setAddress(String address) {this.address = address;}
 	

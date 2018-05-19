@@ -1,5 +1,7 @@
 package service;
 
+import java.util.List;
+
 import dao.*;
 import modle.*;
 import util.ShowMessageUtil;
@@ -19,16 +21,16 @@ public class UserService {
         return userService;
     }
     
-    private UserDaoImpl userdao;
+    private UserDaoImpl userDao;
     
     private UserService(){
-        userdao = UserDaoImpl.getInstance();
+        userDao = UserDaoImpl.getInstance();
     }
     
     
 	public boolean addUser(int id, String name, String password) {
 		User user = new User(id, name, password, 50);
-		if (userdao.insertUser(user)) {
+		if (userDao.insertUser(user)) {
 			ShowMessageUtil.winMessage("注册成功！");
 			return true;
 		} else {
@@ -36,6 +38,21 @@ public class UserService {
 		    return false;
 		}
 	}
+
+
+    public Object[][] queryAllUser() {
+        List<User> list = userDao.queryAllUser();
+        Object[][] obj = new Object[list.size()][4];
+        int i = 0;
+        for (User u: list) {
+            obj[i][0] = u.getId();
+            obj[i][1] = u.getName();
+            obj[i][2] = u.getPassword();
+            obj[i][3] = u.getPoint();
+            i++;
+        }
+        return obj;
+    }
 
     
 }

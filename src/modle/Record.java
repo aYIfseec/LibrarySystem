@@ -12,7 +12,6 @@ public class Record {
 	
 	public Record(){}
 	public Record(int uid, int bid, String lendTime, String returnTime) {
-		//this.id = id;
 		this.uid = uid;
 		this.bid = bid;
 		this.lendTime = lendTime;
@@ -20,14 +19,13 @@ public class Record {
 	}
 	
 	public Record(int bid, String lendTime, String returnTime) {
-		//this.id = id;
-		//this.uid = uid;
-		this.bid = bid;
-		this.lendTime = lendTime;
-		this.returnTime = returnTime;
+	    this(0, bid, lendTime, returnTime);
 	}
 	
-	public int getId() {return id;}
+	public Record(String lendTime2, String returnTime2) {
+        this(0, lendTime2, returnTime2);
+    }
+    public int getId() {return id;}
 	public void setId(int id) {this.id = id;}
 	
 	public int getUid() {return uid;}

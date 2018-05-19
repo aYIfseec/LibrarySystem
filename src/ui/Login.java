@@ -219,13 +219,13 @@ public class Login implements ActionListener {
             user = loginService.userLogin(realId, pswd);
             if (user != null) {
                 res = true;
-                UserUi.mainUi(realId, 1);
+                UserUi.mainUi(realId, UserUi.CARD1);
             }
         } else {
             admin = loginService.adminLogin(realId, pswd);
             if (admin != null) {
                 res = true;
-                AdminUi.mainUi(realId, 1);
+                AdminUi.mainUi(realId, UserUi.CARD1);
             }
         }
         

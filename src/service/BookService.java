@@ -31,15 +31,11 @@ public class BookService {
         return bookService;
     }
     
-    public static final String TABLE_HEAD = "<html><style>"
-            + "table{margin-top:0px;padding-left:10px;}"
-            + "td{width:100px;}.name{width:150px;}</style>"
-            + "<table><tr><td>状 态</td><td class='name'>书 名</td><td>剩余数量</td><td>类 型</td>"
-            + "<td>作 者</td><td>被借次数</td><td>所在位置</td></tr>";
-    public static final String TABLE_TAIL = "</table></html>";
+    public static final String CAN = "可借";
+    public static final String CANT = "无库存";
     
-    public boolean lendBook(int uId, int bId){
-        Book bk = bookDao.queryBook(bId);
+    public boolean lendBook(int uId, String name){
+        Book bk = bookDao.searchBook(name);
         // 已借出数量等于书籍总数量，则不可借
         if(bk.getCount() == bk.getHasLended()) return false;
         Record rd = new Record(uId,bk.getId(), DateUtil.getDate(), "未还");
@@ -98,8 +94,9 @@ public class BookService {
     }
 
     
-    public boolean returnBook(int uId, int bId){
-        Book bk = bookDao.queryBook(bId);
+    public boolean returnBook(int uId, String name){
+        Book bk = bookDao.searchBook(name);
+        if (bk.getId() <= 0) return false;
         bk.setHasLended(bk.getHasLended() - 1);
         Connection conn = BaseDaoImpl.getConn();
         try {
@@ -153,30 +150,44 @@ public class BookService {
         }
     }
 
-    public boolean updateBook(Book b) {
-        return false;
-    }
-
-
-    public String queryAllBooks() {
+    public Object[][] queryAllBooks() {
         List<Book> list = bookDao.queryAllBooks();
-        StringBuilder booksStr = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            String str;
-            if (list.get(i).getCount() == 0) {
-                str = "无库存";
-            } else {
-                str = "可借";
-            }
-            booksStr.append("<tr><td>").append(str);
-            booksStr.append("</td><td class='name'>");
-            booksStr.append(list.get(i).getName()).append("</td><td>");
-            booksStr.append(list.get(i).getCount()).append("</td><td>");
-            booksStr.append(list.get(i).getType()).append("</td><td>");
-            booksStr.append(list.get(i).getAuthor()).append("</td><td>");
-            booksStr.append(list.get(i).getDiscount()).append("</td><td>");
-            booksStr.append(list.get(i).getAddress()).append("</td></tr>");
+        Object[][] obj = new Object[list.size()][7];
+        int i = 0;
+        for (Book book: list) {
+            obj[i][0] = book.getHasLended() < book.getCount() ? CAN : CANT;
+            obj[i][1] = book.getName();
+            obj[i][2] = book.getCount() - book.getHasLended();
+            obj[i][3] = book.getType();
+            obj[i][4] = book.getAuthor();
+            obj[i][5] = book.getDiscount();
+            obj[i][6] = book.getAddress();
+            i++;
         }
-        return TABLE_HEAD + booksStr.toString() + TABLE_TAIL;
+        return obj;
     }
+
+    public Object[][] queryBooks() {
+        List<Book> list = bookDao.queryAllBooks();
+        Object[][] obj = new Object[list.size()][7];
+        int i = 0;
+        for (Book book: list) {
+            obj[i][0] = book.getId();
+            obj[i][1] = book.getName();
+            obj[i][2] = book.getCount() - book.getHasLended();
+            obj[i][3] = book.getType();
+            obj[i][4] = book.getAuthor();
+            obj[i][5] = book.getDiscount();
+            obj[i][6] = book.getAddress();
+            i++;
+        }
+        return obj;
+    }
+
+    public boolean insertBook(String name, int count, String type,
+            String author, String address) {
+        if (bookDao.searchBook(name).getId() > 0) return false;
+        return bookDao.insertBook(name, count, type, author, address);
+    }
+
 }

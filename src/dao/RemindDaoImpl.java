@@ -55,7 +55,7 @@ public class RemindDaoImpl {
      */
     public List<Book> getRemindByUid(int uid) {
         List<Book> books = new ArrayList<Book>();
-        String sql = "select Book.id as id, name from Remind, Book " +
+        String sql = "select Remind.id as id, name from Remind, Book " +
         		"where Remind.bid = Book.id and isRead = 0 and uid="+uid;
         Connection conn = BaseDaoImpl.getConn();
         ResultSet rs = null;
@@ -90,13 +90,14 @@ public class RemindDaoImpl {
      * 批量更新为已读提醒
      * @param str
      */
-    public void updataRemindBatch(String str) {
-        String sql = "updata Remind set isRead = 1 in (" + str + ")";
+    public void updateRemindBatch(String str) {
+        String sql = "update Remind set isRead = 1 where id in (" + str + ")";
+        System.out.println(sql);
         Connection conn = BaseDaoImpl.getConn();
         PreparedStatement psts = null;
         try {
             psts = conn.prepareStatement(sql);
-            psts.executeQuery();// 执行
+            psts.executeUpdate();// 执行
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
